@@ -27,27 +27,34 @@ def tailor_resume():
     doc = Document("base_resume.docx")
 
     def replace_last_n_after_heading(section_title, new_texts, count):
+        found_index = None
         for i, para in enumerate(doc.paragraphs):
             if section_title in para.text:
-                section_paras = []
-                j = i + 1
-                while j < len(doc.paragraphs):
-                    if doc.paragraphs[j].text.strip() == "" or doc.paragraphs[j].text.strip()[0].isupper():
-                        break
-                    section_paras.append(j)
-                    j += 1
-
-                if len(section_paras) < count:
-                    print(f"⚠️ Not enough content under {section_title} to replace {count} items.")
-                    return
-
-                for k in range(count):
-                    idx = section_paras[-count + k]
-                    doc.paragraphs[idx].text = new_texts[k]
-                    for run in doc.paragraphs[idx].runs:
-                        run.font.size = Pt(10.5)
-                        run.font.name = "Times New Roman"
+                found_index = i
                 break
+
+        if found_index is None:
+            print(f"❌ Section '{section_title}' not found.")
+            return
+
+        section_paras = []
+        for j in range(found_index + 1, len(doc.paragraphs)):
+            text = doc.paragraphs[j].text.strip()
+            if len(text) > 0 and text.isupper():  # likely a new section heading
+                break
+            if text:
+                section_paras.append(j)
+
+        if len(section_paras) < count:
+            print(f"⚠️ Not enough content under {section_title} to replace {count} items.")
+            return
+
+        for k in range(count):
+            idx = section_paras[-count + k]
+            doc.paragraphs[idx].text = new_texts[k]
+            for run in doc.paragraphs[idx].runs:
+                run.font.size = Pt(10.5)
+                run.font.name = "Times New Roman"
 
     replace_last_n_after_heading("iCONSULT COLLABORATIVE", experience[:1], 1)
     replace_last_n_after_heading("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
