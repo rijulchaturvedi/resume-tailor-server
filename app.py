@@ -26,24 +26,29 @@ def tailor_resume():
 
     doc = Document("base_resume.docx")
 
-    def replace_last_bullets(section_title, new_bullets, count):
-        for i, para in enumerate(doc.paragraphs):
-            if section_title in para.text:
-                bullet_indices = []
-                j = i + 1
-                while j < len(doc.paragraphs):
-                    if doc.paragraphs[j].text.strip().startswith("•"):
-                        bullet_indices.append(j)
-                    elif doc.paragraphs[j].text.strip() == "" or doc.paragraphs[j].text.strip()[0].isupper():
-                        break
-                    j += 1
-                for k in range(count):
-                    idx = bullet_indices[-count + k]
-                    doc.paragraphs[idx].text = new_bullets[k]
-                    for run in doc.paragraphs[idx].runs:
-                        run.font.size = Pt(10.5)
-                        run.font.name = "Times New Roman"
-                break
+  def replace_last_bullets(section_title, new_bullets, count):
+    for i, para in enumerate(doc.paragraphs):
+        if section_title in para.text:
+            bullet_indices = []
+            j = i + 1
+            while j < len(doc.paragraphs):
+                if doc.paragraphs[j].text.strip().startswith("•"):
+                    bullet_indices.append(j)
+                elif doc.paragraphs[j].text.strip() == "" or doc.paragraphs[j].text.strip()[0].isupper():
+                    break
+                j += 1
+
+            if len(bullet_indices) < count:
+                print(f"⚠️ Not enough bullets found under {section_title}")
+                return
+
+            for k in range(count):
+                idx = bullet_indices[-count + k]
+                doc.paragraphs[idx].text = new_bullets[k]
+                for run in doc.paragraphs[idx].runs:
+                    run.font.size = Pt(10.5)
+                    run.font.name = "Times New Roman"
+            break
 
     replace_last_bullets("iCONSULT COLLABORATIVE", experience[:1], 1)
     replace_last_bullets("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
