@@ -27,6 +27,10 @@ def tailor_resume():
     doc = Document("base_resume.docx")
 
     def replace_last_n_after_heading(section_title, new_texts, count):
+        if len(new_texts) < count:
+            print(f"⚠️ Not enough GPT bullets provided for '{section_title}' — expected {count}, got {len(new_texts)}")
+            return
+
         found_index = None
         for i, para in enumerate(doc.paragraphs):
             if section_title in para.text:
@@ -46,7 +50,7 @@ def tailor_resume():
                 section_paras.append(j)
 
         if len(section_paras) < count:
-            print(f"⚠️ Not enough content under {section_title} to replace {count} items.")
+            print(f"⚠️ Not enough resume paragraphs under '{section_title}' to replace {count}.")
             return
 
         for k in range(count):
