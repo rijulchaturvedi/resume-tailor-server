@@ -5,6 +5,7 @@ from docx import Document
 from docx.shared import Pt
 import io
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/tailor": {"origins": "chrome-extension://*"}})
@@ -26,11 +27,7 @@ def tailor_resume():
 
     doc = Document("base_resume.docx")
 
-    def replace_last_n_after_heading(section_title, new_texts, count):
-        if len(new_texts) < count:
-            print(f"⚠️ Not enough GPT bullets provided for '{section_title}' — expected {count}, got {len(new_texts)}")
-            return
-
+    def replace_bullets_by_match(section_title, new_bullets, count):
         found_index = None
         for i, para in enumerate(doc.paragraphs):
             if section_title in para.text:
@@ -38,31 +35,31 @@ def tailor_resume():
                 break
 
         if found_index is None:
-            print(f"❌ Section '{section_title}' not found.")
+            print("❌ Section '{}' not found.".format(section_title))
             return
 
-        section_paras = []
+        bullet_indices = []
         for j in range(found_index + 1, len(doc.paragraphs)):
             text = doc.paragraphs[j].text.strip()
-            if len(text) > 0 and text.isupper():  # likely a new section heading
+            if len(text) > 0 and text.isupper():
                 break
-            if text:
-                section_paras.append(j)
+            if text.startswith("•"):
+                bullet_indices.append(j)
 
-        if len(section_paras) < count:
-            print(f"⚠️ Not enough resume paragraphs under '{section_title}' to replace {count}.")
+        if len(bullet_indices) < count:
+            print("⚠️ Not enough bullet lines under '{}'. Found {}.".format(section_title, len(bullet_indices)))
             return
 
         for k in range(count):
-            idx = section_paras[-count + k]
-            doc.paragraphs[idx].text = new_texts[k]
+            idx = bullet_indices[k]
+            doc.paragraphs[idx].text = new_bullets[k]
             for run in doc.paragraphs[idx].runs:
                 run.font.size = Pt(10.5)
                 run.font.name = "Times New Roman"
 
-    replace_last_n_after_heading("iCONSULT COLLABORATIVE", experience[:1], 1)
-    replace_last_n_after_heading("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
-    replace_last_n_after_heading("ERNST & YOUNG", experience[3:4], 1)
+    replace_bullets_by_match("iCONSULT COLLABORATIVE", experience[:1], 1)
+    replace_bullets_by_match("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
+    replace_bullets_by_match("ERNST & YOUNG", experience[3:4], 1)
 
     for i, para in enumerate(doc.paragraphs):
         if "Core Competencies" in para.text:
@@ -73,9 +70,11 @@ def tailor_resume():
     doc.save(output)
     output.seek(0)
 
+    filename = "Rijul Chaturvedi Resume - " + datetime.now().strftime('%Y-%m-%d') + ".docx"
+
     response = make_response(send_file(
         output,
-        download_name="Rijul_Chaturvedi_Resume_Tailored.docx",
+        download_name=filename,
         as_attachment=True
     ))
     response.headers["Access-Control-Allow-Origin"] = origin
@@ -84,3 +83,4 @@ def tailor_resume():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port)
+
