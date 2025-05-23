@@ -27,7 +27,7 @@ def tailor_resume():
 
     doc = Document("base_resume.docx")
 
-    def replace_last_n_bullets(section_title, new_bullets, count):
+    def replace_last_n_paragraphs(section_title, new_bullets, count):
         found_index = None
         for i, para in enumerate(doc.paragraphs):
             if section_title in para.text:
@@ -38,28 +38,28 @@ def tailor_resume():
             print(f"❌ Section '{section_title}' not found.")
             return
 
-        bullet_indices = []
+        section_indices = []
         for j in range(found_index + 1, len(doc.paragraphs)):
             text = doc.paragraphs[j].text.strip()
-            if len(text) > 0 and text.isupper():  # likely a new section heading
+            if len(text) > 0 and text.isupper():
                 break
-            if text.startswith("•"):
-                bullet_indices.append(j)
+            if text:
+                section_indices.append(j)
 
-        if len(bullet_indices) < count:
-            print(f"⚠️ Not enough bullets under '{section_title}'. Found {len(bullet_indices)}, need {count}.")
+        if len(section_indices) < count:
+            print(f"⚠️ Not enough paragraphs to replace under '{section_title}'.")
             return
 
         for k in range(count):
-            idx = bullet_indices[-count + k]
+            idx = section_indices[-count + k]
             doc.paragraphs[idx].text = new_bullets[k]
             for run in doc.paragraphs[idx].runs:
                 run.font.size = Pt(10.5)
                 run.font.name = "Times New Roman"
 
-    replace_last_n_bullets("iCONSULT COLLABORATIVE", experience[:1], 1)
-    replace_last_n_bullets("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
-    replace_last_n_bullets("ERNST & YOUNG", experience[3:4], 1)
+    replace_last_n_paragraphs("iCONSULT COLLABORATIVE", experience[:1], 1)
+    replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
+    replace_last_n_paragraphs("ERNST & YOUNG", experience[3:4], 1)
 
     for i, para in enumerate(doc.paragraphs):
         if "Core Competencies" in para.text:
@@ -74,10 +74,11 @@ def tailor_resume():
 
     response = make_response(send_file(
         output,
-        download_name=filename,
-        as_attachment=True
+        as_attachment=True,
+        download_name=filename
     ))
     response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
 if __name__ == "__main__":
