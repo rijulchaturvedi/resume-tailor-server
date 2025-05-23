@@ -4,6 +4,7 @@ from flask_cors import CORS
 from docx import Document
 from docx.shared import Pt
 import io
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/tailor": {"origins": "chrome-extension://*"}})
@@ -25,33 +26,32 @@ def tailor_resume():
 
     doc = Document("base_resume.docx")
 
-    def replace_last_bullets(section_title, new_bullets, count):
+    def replace_last_n_after_heading(section_title, new_texts, count):
         for i, para in enumerate(doc.paragraphs):
             if section_title in para.text:
-                bullet_indices = []
+                section_paras = []
                 j = i + 1
                 while j < len(doc.paragraphs):
-                    if doc.paragraphs[j].text.strip().startswith("•"):
-                        bullet_indices.append(j)
-                    elif doc.paragraphs[j].text.strip() == "" or doc.paragraphs[j].text.strip()[0].isupper():
+                    if doc.paragraphs[j].text.strip() == "" or doc.paragraphs[j].text.strip()[0].isupper():
                         break
+                    section_paras.append(j)
                     j += 1
 
-                if len(bullet_indices) < count:
-                    print(f"⚠️ Not enough bullets found under {section_title}")
+                if len(section_paras) < count:
+                    print(f"⚠️ Not enough content under {section_title} to replace {count} items.")
                     return
 
                 for k in range(count):
-                    idx = bullet_indices[-count + k]
-                    doc.paragraphs[idx].text = new_bullets[k]
+                    idx = section_paras[-count + k]
+                    doc.paragraphs[idx].text = new_texts[k]
                     for run in doc.paragraphs[idx].runs:
                         run.font.size = Pt(10.5)
                         run.font.name = "Times New Roman"
                 break
 
-    replace_last_bullets("iCONSULT COLLABORATIVE", experience[:1], 1)
-    replace_last_bullets("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
-    replace_last_bullets("ERNST & YOUNG", experience[3:4], 1)
+    replace_last_n_after_heading("iCONSULT COLLABORATIVE", experience[:1], 1)
+    replace_last_n_after_heading("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
+    replace_last_n_after_heading("ERNST & YOUNG", experience[3:4], 1)
 
     for i, para in enumerate(doc.paragraphs):
         if "Core Competencies" in para.text:
@@ -71,6 +71,5 @@ def tailor_resume():
     return response
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port)
