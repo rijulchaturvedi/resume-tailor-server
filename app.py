@@ -4,6 +4,7 @@ from flask_cors import CORS
 from docx import Document
 from docx.shared import Pt
 import io
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/tailor": {"origins": "chrome-extension://*"}})
@@ -66,4 +67,5 @@ def tailor_resume():
     return response
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
