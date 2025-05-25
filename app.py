@@ -58,7 +58,7 @@ def tailor_resume():
                 run.font.size = Pt(10.5)
                 run.font.name = "Times New Roman"
 
-    # skip iConsult, replace last 3 for Frappe, last 2 for EY
+    replace_last_n_paragraphs("iCONSULT COLLABORATIVE", experience[0:1], 1)
     replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:4], 3)
     replace_last_n_paragraphs("ERNST & YOUNG", experience[4:6], 2)
 
