@@ -52,7 +52,7 @@ def tailor_resume():
 
         for k in range(count):
             idx = section_indices[-count + k]
-            clean_bullet = new_bullets[k].replace("•", "•").strip()
+            clean_bullet = new_bullets[k].replace("â€¢", "").replace("•", "\u2022").strip()
             doc.paragraphs[idx].text = clean_bullet
             for run in doc.paragraphs[idx].runs:
                 run.font.size = Pt(10.5)
