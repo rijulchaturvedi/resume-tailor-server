@@ -58,8 +58,8 @@ def tailor_resume():
                 run.font.name = "Times New Roman"
 
     replace_last_n_paragraphs("iCONSULT COLLABORATIVE", experience[:1], 1)
-    replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:3], 2)
-    replace_last_n_paragraphs("ERNST & YOUNG", experience[3:4], 1)
+    replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:4], 3)
+    replace_last_n_paragraphs("ERNST & YOUNG", experience[4:6], 2)
 
     for i, para in enumerate(doc.paragraphs):
         if "Core Competencies" in para.text:
