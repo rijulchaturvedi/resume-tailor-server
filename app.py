@@ -52,12 +52,13 @@ def tailor_resume():
 
         for k in range(count):
             idx = section_indices[-count + k]
-            doc.paragraphs[idx].text = new_bullets[k]
+            clean_bullet = new_bullets[k].replace("•", "•").strip()
+            doc.paragraphs[idx].text = clean_bullet
             for run in doc.paragraphs[idx].runs:
                 run.font.size = Pt(10.5)
                 run.font.name = "Times New Roman"
 
-    replace_last_n_paragraphs("iCONSULT COLLABORATIVE", experience[:1], 1)
+    # skip iConsult, replace last 3 for Frappe, last 2 for EY
     replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:4], 3)
     replace_last_n_paragraphs("ERNST & YOUNG", experience[4:6], 2)
 
@@ -78,6 +79,7 @@ def tailor_resume():
         download_name=filename
     ))
     response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Content-Type"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
