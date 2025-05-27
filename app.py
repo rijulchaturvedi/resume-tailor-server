@@ -52,15 +52,15 @@ def tailor_resume():
 
         for k in range(count):
             idx = section_indices[-count + k]
-            clean_bullet = new_bullets[k].replace("â€¢", "").replace("•", "\u2022").strip()
+            clean_bullet = new_bullets[k].replace("â€¢", "").replace("•", "•").strip()
             doc.paragraphs[idx].text = clean_bullet
             for run in doc.paragraphs[idx].runs:
                 run.font.size = Pt(10.5)
                 run.font.name = "Times New Roman"
 
-    replace_last_n_paragraphs("iCONSULT COLLABORATIVE", experience[0:1], 1)
-    replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[1:4], 3)
-    replace_last_n_paragraphs("ERNST & YOUNG", experience[4:6], 2)
+    replace_last_n_paragraphs("iCONSULT COLLABORATIVE, SYRACUSE UNIVERSITY", experience[0:2], 2)
+    replace_last_n_paragraphs("FRAPPE TECHNOLOGIES PRIVATE LIMITED", experience[2:6], 4)
+    replace_last_n_paragraphs("ERNST & YOUNG", experience[6:8], 2)
 
     for i, para in enumerate(doc.paragraphs):
         if "Core Competencies" in para.text:
@@ -86,3 +86,4 @@ def tailor_resume():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port)
+
